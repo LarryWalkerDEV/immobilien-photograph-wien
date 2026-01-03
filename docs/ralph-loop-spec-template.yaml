@@ -1,0 +1,519 @@
+# =============================================================================
+# RALPH LOOP SPEC TEMPLATE
+# =============================================================================
+# Copy this template and fill in for your project.
+# Every field marked [REQUIRED] must be filled.
+# Delete example content and replace with your specifics.
+# =============================================================================
+
+metadata:
+  spec_version: "1.0"
+  project_name: "[REQUIRED] Your Project Name"
+  project_type: "[REQUIRED] web-app | cli | api | mobile | data-pipeline | automation | library"
+  created_date: "[REQUIRED] YYYY-MM-DD"
+  complexity: "low | medium | high"
+
+# =============================================================================
+# CONTEXT
+# =============================================================================
+
+context:
+  goal:
+    summary: "[REQUIRED] One sentence describing what this project does"
+    details: |
+      [Optional] Longer description with more context
+
+  success_definition: |
+    [REQUIRED] Concrete description of what "done" looks like.
+    Be specific enough that success can be verified.
+    Example: "User can log in, see dashboard with 4 metrics, export to CSV"
+
+  existing_state:
+    description: "[REQUIRED] What exists before this work starts"
+    existing_files:
+      - path: ""
+        purpose: ""
+    existing_dependencies:
+      - name: ""
+        version: ""
+
+  constraints:
+    technical:
+      - "[REQUIRED] List technical constraints"
+      # Examples:
+      # - "Must use TypeScript"
+      # - "Must work offline"
+      # - "Cannot use external APIs"
+    compatibility:
+      - "[REQUIRED] List compatibility requirements"
+      # Examples:
+      # - "Chrome 90+, Firefox 88+, Safari 14+"
+      # - "Node.js 18+"
+      # - "Windows 10/11, macOS 12+"
+    performance:
+      - "[Optional] List performance requirements"
+      # Examples:
+      # - "Page load < 3 seconds"
+      # - "API response < 200ms"
+      # - "Memory usage < 500MB"
+
+# =============================================================================
+# SKILLS
+# =============================================================================
+
+skills:
+  required:
+    # [REQUIRED] List skills that MUST be invoked at project start
+    # Choose based on project type:
+    #
+    # FRONTEND/WEB:
+    # - name: "document-skills:frontend-design"
+    #   purpose: "Distinctive UI, avoid generic aesthetics"
+    # - name: "document-skills:webapp-testing"
+    #   purpose: "Playwright verification patterns"
+    #
+    # DOCUMENTS:
+    # - name: "document-skills:pdf"
+    # - name: "document-skills:docx"
+    # - name: "document-skills:xlsx"
+    # - name: "document-skills:pptx"
+    #
+    # ASSET GENERATION:
+    # - name: "kie.ai"
+    #   purpose: "Image/video generation"
+    #   config:
+    #     text_to_image_model: "kling-v2.0-master"
+    #     image_to_video_model: "kling-v2.6-master"
+    #
+    # INTEGRATION:
+    # - name: "document-skills:mcp-builder"
+
+    - name: "[REQUIRED] skill-name"
+      purpose: "[REQUIRED] Why this skill is needed"
+
+  optional:
+    - name: ""
+      invoke_when: ""
+
+# =============================================================================
+# PHASES
+# =============================================================================
+
+phases:
+  # ---------------------------------------------------------------------------
+  # PHASE 0: SETUP (Gate: 100% - ALL must pass)
+  # ---------------------------------------------------------------------------
+  - id: "phase_0"
+    name: "Setup & Configuration"
+    gate_threshold: 100
+    description: "Environment setup, config validation, skill loading"
+
+    requirements:
+      - id: "P0-001"
+        description: "[REQUIRED] Dependencies installed"
+        acceptance_criteria:
+          - criterion: "Install command succeeds"
+            test_type: "command"
+            test_method: "npm install | pip install -r requirements.txt | cargo build"
+            pass_condition: "Exit code 0"
+        weight: 25
+
+      - id: "P0-002"
+        description: "[REQUIRED] Configuration validated"
+        acceptance_criteria:
+          - criterion: "Config files exist and are valid"
+            test_type: "file_check"
+            test_method: |
+              1. Check config file exists
+              2. Parse config (JSON/YAML/TOML)
+              3. Validate required fields present
+            pass_condition: "All config files valid, no parse errors"
+
+          - criterion: "Config paths match filesystem"
+            test_type: "script"
+            test_method: |
+              For each path referenced in config:
+                Assert path exists on filesystem
+            pass_condition: "All referenced paths exist"
+        weight: 35
+
+      - id: "P0-003"
+        description: "[REQUIRED] Skills invoked"
+        acceptance_criteria:
+          - criterion: "All required skills loaded"
+            test_type: "skill_check"
+            test_method: "Verify each skill in required_skills was invoked"
+            pass_condition: "All skills show as loaded"
+        weight: 20
+
+      - id: "P0-004"
+        description: "[REQUIRED] Development environment ready"
+        acceptance_criteria:
+          - criterion: "Server/process starts"
+            test_type: "command"
+            test_method: "Start command runs without error"
+            pass_condition: "Process running, health check passes"
+        weight: 20
+
+  # ---------------------------------------------------------------------------
+  # PHASE 1: FOUNDATION (Gate: 80%)
+  # ---------------------------------------------------------------------------
+  - id: "phase_1"
+    name: "Foundation"
+    gate_threshold: 80
+    description: "Core structure, base functionality"
+
+    requirements:
+      # [REQUIRED] Add your foundation requirements
+      # Examples by project type:
+
+      # WEB APP:
+      # - id: "P1-001"
+      #   description: "Base layout renders"
+      #   acceptance_criteria:
+      #     - criterion: "Layout visible"
+      #       test_type: "visual"
+      #       test_method: "Playwright screenshot of /"
+      #       pass_condition: "Screenshot shows layout, no errors"
+
+      # CLI:
+      # - id: "P1-001"
+      #   description: "Help command works"
+      #   acceptance_criteria:
+      #     - criterion: "--help shows usage"
+      #       test_type: "command"
+      #       test_method: "./mycli --help"
+      #       pass_condition: "Exit 0, stdout contains usage info"
+
+      # API:
+      # - id: "P1-001"
+      #   description: "Health endpoint works"
+      #   acceptance_criteria:
+      #     - criterion: "GET /health returns 200"
+      #       test_type: "http"
+      #       test_method: "curl http://localhost:3000/health"
+      #       pass_condition: "Status 200, body contains 'ok'"
+
+      - id: "P1-001"
+        description: "[REQUIRED] Your foundation requirement"
+        acceptance_criteria:
+          - criterion: "[REQUIRED] Specific testable condition"
+            test_type: "[REQUIRED] visual | command | http | file_check | script"
+            test_method: "[REQUIRED] Exact steps to verify"
+            pass_condition: "[REQUIRED] What result means PASS"
+        weight: 0  # [REQUIRED] Set weight (total should = 100 for phase)
+
+  # ---------------------------------------------------------------------------
+  # PHASE 2: IMPLEMENTATION (Gate: 80%)
+  # ---------------------------------------------------------------------------
+  - id: "phase_2"
+    name: "Implementation"
+    gate_threshold: 80
+    description: "Core features built"
+
+    requirements:
+      # [REQUIRED] Add your implementation requirements
+      # Each feature should have:
+      # - Clear description
+      # - Multiple acceptance criteria covering:
+      #   - Happy path (normal use)
+      #   - Error handling
+      #   - Edge cases
+
+      - id: "P2-001"
+        description: "[REQUIRED] Feature description"
+        acceptance_criteria:
+          - criterion: "Happy path works"
+            test_type: ""
+            test_method: ""
+            pass_condition: ""
+
+          - criterion: "Error case handled"
+            test_type: ""
+            test_method: ""
+            pass_condition: ""
+        weight: 0
+
+  # ---------------------------------------------------------------------------
+  # PHASE 3: VERIFICATION (Gate: 100% - NO EXCEPTIONS)
+  # ---------------------------------------------------------------------------
+  - id: "phase_3"
+    name: "Verification"
+    gate_threshold: 100
+    description: "All outputs verified with proof - THIS PHASE IS MANDATORY"
+
+    requirements:
+      - id: "P3-001"
+        description: "Verification artifacts exist"
+        acceptance_criteria:
+          - criterion: "Proof directory contains artifacts"
+            test_type: "file_check"
+            test_method: "ls verification/"
+            pass_condition: "Directory exists and contains proof files"
+        weight: 30
+
+      - id: "P3-002"
+        description: "All Phase 2 outputs verified"
+        acceptance_criteria:
+          - criterion: "Each feature has verification proof"
+            test_type: "checklist"
+            test_method: |
+              For each P2 requirement:
+                Assert verification artifact exists
+                Assert artifact shows passing result
+            pass_condition: "All P2 requirements have passing proof"
+        weight: 40
+
+      - id: "P3-003"
+        description: "No errors in logs/console"
+        acceptance_criteria:
+          - criterion: "Error logs empty or acceptable"
+            test_type: "log_check"
+            test_method: "Check console/stderr/error logs"
+            pass_condition: "No unexpected errors"
+        weight: 30
+
+  # ---------------------------------------------------------------------------
+  # PHASE 4: POLISH (Gate: 90%)
+  # ---------------------------------------------------------------------------
+  - id: "phase_4"
+    name: "Polish & Validation"
+    gate_threshold: 90
+    description: "Edge cases, quality checks, documentation"
+
+    requirements:
+      - id: "P4-001"
+        description: "Edge cases handled"
+        acceptance_criteria:
+          - criterion: "[REQUIRED] Define edge case tests"
+            test_type: ""
+            test_method: ""
+            pass_condition: ""
+        weight: 40
+
+      - id: "P4-002"
+        description: "Quality checks pass"
+        acceptance_criteria:
+          # Add relevant quality checks:
+          # - Linting passes
+          # - Type checking passes
+          # - Tests pass
+          # - Performance meets requirements
+          - criterion: ""
+            test_type: ""
+            test_method: ""
+            pass_condition: ""
+        weight: 40
+
+      - id: "P4-003"
+        description: "Documentation complete"
+        acceptance_criteria:
+          - criterion: "README exists and is accurate"
+            test_type: "file_check"
+            test_method: "Check README.md exists and describes project"
+            pass_condition: "README present and not placeholder"
+        weight: 20
+
+# =============================================================================
+# VERIFICATION PROTOCOL
+# =============================================================================
+
+verification:
+  # The fundamental rule
+  golden_rule: |
+    NEVER mark a task as complete without verification proof.
+    "I wrote the code" is NOT verification.
+    "I wrote the code and here's proof it works" IS verification.
+
+  # By output type
+  methods:
+    visual:
+      tool: "Playwright | Chrome DevTools MCP | Simulator"
+      process:
+        - "Navigate/render the output"
+        - "Take screenshot"
+        - "ANALYZE screenshot against requirements"
+        - "Document what you see"
+      required_output: "Screenshot file + analysis text"
+
+    command:
+      tool: "Bash | terminal"
+      process:
+        - "Run the command"
+        - "Capture stdout, stderr, exit code"
+        - "Compare against expected output"
+      required_output: "Command output + pass/fail assessment"
+
+    http:
+      tool: "curl | httpie | Playwright network"
+      process:
+        - "Make the HTTP request"
+        - "Capture status, headers, body"
+        - "Validate against expected schema/values"
+      required_output: "Request/response log + validation result"
+
+    file:
+      tool: "Read tool | diff | inspection"
+      process:
+        - "Read the output file"
+        - "Validate format and content"
+        - "Compare against expected structure"
+      required_output: "File contents or summary + validation result"
+
+  # Checklist to run before marking ANY task complete
+  checklist:
+    - question: "Did I RUN the code/command?"
+      required_answer: "yes"
+    - question: "Did I CAPTURE the output (screenshot/log/response)?"
+      required_answer: "yes"
+    - question: "Did I ANALYZE the output against requirements?"
+      required_answer: "yes"
+    - question: "Does the output PROVE the requirement is met?"
+      required_answer: "yes"
+    - question: "Are there any errors in console/logs/stderr?"
+      required_answer: "no (or documented acceptable errors)"
+
+  # If ANY checklist answer is wrong
+  on_checklist_fail: "DO NOT mark task as complete. Fix and re-verify."
+
+# =============================================================================
+# GRADING
+# =============================================================================
+
+grading:
+  phase_weights:
+    phase_0: 0.15
+    phase_1: 0.20
+    phase_2: 0.30
+    phase_3: 0.25
+    phase_4: 0.10
+
+  calculation:
+    criterion_score: "IF passes THEN weight ELSE 0"
+    phase_score: "sum(criterion_scores) / sum(weights) * 100"
+    overall_score: "sum(phase_score * phase_weight)"
+
+  tiers:
+    - name: "gold"
+      min_score: 90
+      meaning: "Production ready"
+      action: "proceed_to_deployment"
+
+    - name: "silver"
+      min_score: 80
+      meaning: "Minor fixes needed"
+      action: "fix_and_reverify"
+
+    - name: "bronze"
+      min_score: 70
+      meaning: "Significant fixes needed"
+      action: "major_revision"
+
+    - name: "fail"
+      min_score: 0
+      meaning: "Major rework required"
+      action: "restart_phase"
+
+# =============================================================================
+# LOOP CONTROL
+# =============================================================================
+
+loop_control:
+  max_attempts_per_phase: 5
+  max_total_attempts: 20
+
+  on_gate_fail:
+    attempts_1_3:
+      action: "auto_fix_and_retry"
+      steps:
+        - "Identify failing criteria"
+        - "Analyze root cause"
+        - "Implement fix"
+        - "Re-verify"
+
+    attempts_4_5:
+      action: "request_clarification"
+      steps:
+        - "Document what's been tried"
+        - "Identify blocker"
+        - "Ask for human guidance"
+
+    attempts_exceeded:
+      action: "escalate"
+      steps:
+        - "Generate failure report"
+        - "Halt loop"
+        - "Require human intervention"
+
+  checkpoints:
+    after_phase_0: "save_environment_state"
+    after_phase_1: "save_foundation_state"
+    after_phase_2: "save_implementation_state"
+    after_phase_3: "save_verification_report"
+    after_phase_4: "save_final_report"
+
+# =============================================================================
+# OUTPUTS
+# =============================================================================
+
+outputs:
+  required:
+    - type: "verification_proof"
+      location: "verification/"
+      description: "Screenshots, logs, test results proving requirements met"
+
+    - type: "error_log"
+      location: "verification/errors.log"
+      description: "Any errors encountered and resolutions"
+
+    - type: "completion_report"
+      location: "verification/report.json"
+      description: "Phase scores, overall score, tier achieved"
+
+  # Add project-specific outputs
+  project_specific:
+    - type: ""
+      location: ""
+      description: ""
+
+# =============================================================================
+# MAPPINGS (if applicable)
+# =============================================================================
+# Use this section to define mappings that must be validated
+# (e.g., routes to content, IDs to resources, variants to designs)
+
+mappings:
+  # Example:
+  # route_to_content:
+  #   - route: "/dashboard"
+  #     content_key: "dashboardData"
+  #     verification: "Page at /dashboard uses dashboardData"
+  #
+  #   - route: "/settings"
+  #     content_key: "settingsData"
+  #     verification: "Page at /settings uses settingsData"
+
+  validation_rule: |
+    For each mapping:
+      1. Check source references correct target
+      2. Visual/functional verify output matches expected
+      3. Flag any mismatches immediately
+
+# =============================================================================
+# BANNED PATTERNS (project-specific)
+# =============================================================================
+# Define patterns that should trigger warnings or failures
+
+banned_patterns:
+  # Examples for frontend:
+  # - pattern: "font-family: Inter"
+  #   reason: "Overused generic font"
+  #   severity: "warning"
+  #
+  # - pattern: "console.log"
+  #   reason: "Debug code in production"
+  #   severity: "error"
+
+  - pattern: ""
+    reason: ""
+    severity: "warning | error"
