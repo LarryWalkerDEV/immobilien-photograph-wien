@@ -1,0 +1,551 @@
+# Ralph Loop Specification for Frontend Development
+# Version: 1.0
+# This file defines machine-parseable rules for AI-driven development loops
+
+metadata:
+  version: "1.0"
+  created: "2026-01-03"
+  project_type: "frontend-website"
+  framework: "nextjs"
+
+# =============================================================================
+# SKILLS CONFIGURATION
+# =============================================================================
+
+required_skills:
+  - name: "document-skills:frontend-design"
+    invoke_at: "project_start"
+    purpose: "Enforce distinctive UI guidelines, avoid generic AI aesthetics"
+    mandatory: true
+
+  - name: "document-skills:webapp-testing"
+    invoke_at: "project_start"
+    purpose: "Provide Playwright patterns for visual verification"
+    mandatory: true
+
+optional_skills:
+  - name: "document-skills:pdf"
+    invoke_when: "generating PDF documents"
+
+  - name: "document-skills:xlsx"
+    invoke_when: "generating spreadsheets"
+
+  - name: "document-skills:pptx"
+    invoke_when: "generating presentations"
+
+# =============================================================================
+# KIE.AI ASSET GENERATION
+# =============================================================================
+
+kie_ai:
+  api_key_env: "KIE_API_KEY"
+
+  text_to_image:
+    model: "kling-v2.0-master"
+    default_aspect_ratio: "16:9"
+    quality: "8K"
+    prompt_template: |
+      {subject}, {style}, {lighting}, {quality_keywords}
+    quality_keywords:
+      - "8K resolution"
+      - "photorealistic"
+      - "professional photography"
+      - "sharp focus"
+    negative_prompt: "blurry, low quality, watermark, text, artifacts, distorted"
+
+    use_cases:
+      hero_images:
+        aspect_ratio: "16:9"
+        style: "architectural photography, editorial quality"
+      portfolio_images:
+        aspect_ratio: "4:3"
+        style: "real estate photography, bright and airy"
+      background_textures:
+        aspect_ratio: "1:1"
+        style: "abstract, seamless pattern"
+
+  image_to_video:
+    model: "kling-v2.6-master"
+    default_duration: "5"
+    cfg_scale: 0.5
+
+    use_cases:
+      hero_videos:
+        duration: "5"
+        prompt_style: "subtle camera movement, cinematic lighting"
+      motion_graphics:
+        duration: "3"
+        prompt_style: "smooth animation, loop-friendly"
+      ambient_effects:
+        duration: "10"
+        prompt_style: "floating particles, light rays, atmospheric"
+      logo_animations:
+        duration: "2"
+        prompt_style: "elegant reveal, subtle motion"
+
+  creative_applications:
+    - name: "Parallax Depth Layers"
+      description: "Generate multiple images at different 'depths' for parallax"
+      technique: "Create foreground, midground, background versions of scene"
+
+    - name: "Animated Backgrounds"
+      description: "Turn static hero into subtle video loop"
+      technique: "Image-to-video with 'gentle movement' prompt"
+
+    - name: "Transition Effects"
+      description: "Generate smooth transitions between sections"
+      technique: "Image-to-video bridging two keyframe images"
+
+    - name: "Floating Elements"
+      description: "Animated particles, dust, light rays"
+      technique: "Generate transparent overlay videos"
+
+# =============================================================================
+# PHASE DEFINITIONS
+# =============================================================================
+
+phases:
+  - id: "phase_0"
+    name: "Project Setup"
+    gate_threshold: 100  # All must pass
+
+    criteria:
+      - id: "p0_c1"
+        name: "Dependencies installed"
+        test: "bash"
+        command: "npm install && echo 'SUCCESS'"
+        success_pattern: "SUCCESS"
+        weight: 20
+
+      - id: "p0_c2"
+        name: "Dev server starts"
+        test: "bash"
+        command: "timeout 30 npm run dev 2>&1 | grep -E 'Ready|started'"
+        success_pattern: "(Ready|started)"
+        weight: 30
+
+      - id: "p0_c3"
+        name: "Tailwind config paths valid"
+        test: "script"
+        script: "validate-tailwind"
+        success_condition: "exit_code == 0"
+        weight: 30
+
+      - id: "p0_c4"
+        name: "Required skills loaded"
+        test: "skill_check"
+        required_skills:
+          - "document-skills:frontend-design"
+          - "document-skills:webapp-testing"
+        weight: 20
+
+  - id: "phase_1"
+    name: "Asset Generation"
+    gate_threshold: 80
+    skip_if: "assets_exist"
+
+    criteria:
+      - id: "p1_c1"
+        name: "KIE API key configured"
+        test: "env_check"
+        env_var: "KIE_API_KEY"
+        weight: 15
+
+      - id: "p1_c2"
+        name: "Hero images generated"
+        test: "file_check"
+        file: "public/generated/manifest.json"
+        json_path: "heroes.*.image"
+        expected_count: 4
+        weight: 25
+
+      - id: "p1_c3"
+        name: "Hero videos generated"
+        test: "file_check"
+        file: "public/generated/manifest.json"
+        json_path: "heroes.*.video"
+        expected_count: 4
+        weight: 25
+
+      - id: "p1_c4"
+        name: "Portfolio images generated"
+        test: "file_check"
+        file: "public/generated/manifest.json"
+        json_path: "portfolio"
+        min_count: 3
+        weight: 20
+
+      - id: "p1_c5"
+        name: "Assets load without 404"
+        test: "playwright"
+        script: "check-asset-loading"
+        weight: 15
+
+  - id: "phase_2"
+    name: "Design Implementation"
+    gate_threshold: 80
+
+    criteria:
+      - id: "p2_c1"
+        name: "No banned fonts"
+        test: "grep"
+        files: ["app/**/*.tsx", "src/**/*.tsx", "**/*.css"]
+        banned_patterns:
+          - "font-family.*Inter"
+          - "font-family.*Roboto"
+          - "font-family.*Arial"
+          - "fontFamily.*inter"
+        weight: 15
+
+      - id: "p2_c2"
+        name: "CSS variables defined"
+        test: "grep"
+        files: ["app/globals.css", "src/app/globals.css"]
+        required_patterns:
+          - "--color-"
+          - "--font-"
+        min_matches: 5
+        weight: 15
+
+      - id: "p2_c3"
+        name: "Hero section renders"
+        test: "playwright_visual"
+        pages: ["/variant-a", "/variant-b", "/variant-c", "/variant-d"]
+        checks:
+          - "hero_visible"
+          - "hero_height_gt_400"
+        weight: 20
+
+      - id: "p2_c4"
+        name: "Animations present"
+        test: "grep"
+        files: ["app/**/*.tsx", "src/**/*.tsx"]
+        required_patterns:
+          - "framer-motion"
+          - "motion."
+          - "gsap"
+          - "animate"
+        min_matches: 3
+        weight: 15
+
+      - id: "p2_c5"
+        name: "No blank sections"
+        test: "playwright_visual"
+        pages: ["/variant-a", "/variant-b", "/variant-c", "/variant-d"]
+        checks:
+          - "no_white_hero"
+          - "background_color_set"
+        weight: 20
+
+      - id: "p2_c6"
+        name: "Mobile responsive"
+        test: "playwright_visual"
+        viewports: [{width: 375, height: 812}]
+        pages: ["/variant-a", "/variant-b", "/variant-c", "/variant-d"]
+        checks:
+          - "no_horizontal_scroll"
+          - "text_readable"
+        weight: 15
+
+  - id: "phase_3"
+    name: "Visual Verification"
+    gate_threshold: 100  # MANDATORY - NO EXCEPTIONS
+
+    criteria:
+      - id: "p3_c1"
+        name: "No console errors"
+        test: "playwright"
+        script: "check-console-errors"
+        pages: ["/variant-a", "/variant-b", "/variant-c", "/variant-d"]
+        weight: 20
+
+      - id: "p3_c2"
+        name: "Screenshots captured"
+        test: "playwright"
+        script: "capture-screenshots"
+        output_dir: "verification/"
+        pages: ["/variant-a", "/variant-b", "/variant-c", "/variant-d"]
+        weight: 25
+
+      - id: "p3_c3"
+        name: "Typography renders correctly"
+        test: "playwright_visual"
+        checks:
+          - "custom_fonts_loaded"
+          - "no_fallback_fonts"
+        weight: 20
+
+      - id: "p3_c4"
+        name: "Images and videos load"
+        test: "playwright"
+        script: "check-media-loading"
+        weight: 20
+
+      - id: "p3_c5"
+        name: "Design matches intent"
+        test: "manual_or_ai_vision"
+        description: "Compare screenshot to spec description"
+        weight: 15
+
+  - id: "phase_4"
+    name: "Cross-Variant Validation"
+    gate_threshold: 90
+
+    criteria:
+      - id: "p4_c1"
+        name: "Variants visually distinct"
+        test: "screenshot_comparison"
+        comparisons:
+          - ["variant-a", "variant-b"]
+          - ["variant-a", "variant-c"]
+          - ["variant-a", "variant-d"]
+          - ["variant-b", "variant-c"]
+          - ["variant-b", "variant-d"]
+          - ["variant-c", "variant-d"]
+        min_difference: 30  # Percent different
+        weight: 25
+
+      - id: "p4_c2"
+        name: "Correct hero references"
+        test: "script"
+        script: "validate-variants"
+        mappings:
+          variant-a: "luxusMinimalist"
+          variant-b: "cinematicStorytelling"
+          variant-c: "dataRoiDriven"
+          variant-d: "editorialMagazine"
+        weight: 25
+
+      - id: "p4_c3"
+        name: "No content swaps"
+        test: "content_validation"
+        checks:
+          - variant: "variant-a"
+            must_contain: ["gold", "luxus", "elegant"]
+          - variant: "variant-b"
+            must_contain: ["cinematic", "storytelling", "dramatic"]
+          - variant: "variant-c"
+            must_contain: ["data", "ROI", "tech"]
+          - variant: "variant-d"
+            must_contain: ["editorial", "magazine", "chapter"]
+        weight: 25
+
+      - id: "p4_c4"
+        name: "Selector navigation works"
+        test: "playwright"
+        script: "test-variant-selector"
+        weight: 25
+
+# =============================================================================
+# GRADING SYSTEM
+# =============================================================================
+
+grading:
+  phase_weights:
+    phase_0: 0.15
+    phase_1: 0.20
+    phase_2: 0.30
+    phase_3: 0.25
+    phase_4: 0.10
+
+  tiers:
+    gold:
+      min_score: 90
+      label: "Production Ready"
+      action: "proceed_to_deployment"
+    silver:
+      min_score: 80
+      label: "Minor Fixes Needed"
+      action: "fix_and_reverify"
+    bronze:
+      min_score: 70
+      label: "Significant Fixes Needed"
+      action: "major_revision"
+    fail:
+      min_score: 0
+      label: "Major Rework Required"
+      action: "restart_phase"
+
+  calculation: |
+    phase_score = sum(passed_criteria_weights) / sum(all_criteria_weights) * 100
+    overall_score = sum(phase_score * phase_weight for each phase)
+
+# =============================================================================
+# LOOP CONTROL
+# =============================================================================
+
+loop_control:
+  max_iterations_per_phase: 5
+  max_total_iterations: 20
+
+  on_phase_fail:
+    attempts_1_3: "auto_fix_and_retry"
+    attempts_4_5: "request_human_guidance"
+    attempts_exceeded: "escalate_to_human"
+
+  on_visual_verification_fail:
+    action: "take_screenshot_analyze_fix"
+    required_screenshot: true
+    required_analysis: true
+
+  checkpoints:
+    after_phase_0: "save_config_state"
+    after_phase_1: "save_asset_manifest"
+    after_phase_2: "save_screenshots"
+    after_phase_3: "save_verification_report"
+    after_phase_4: "save_final_report"
+
+# =============================================================================
+# BANNED PATTERNS (AUTO-FAIL)
+# =============================================================================
+
+banned_patterns:
+  fonts:
+    - pattern: "Inter"
+      context: "primary font"
+      reason: "Overused generic font"
+    - pattern: "Roboto"
+      context: "primary font"
+      reason: "Overused generic font"
+    - pattern: "Arial"
+      context: "any use"
+      reason: "System font, lacks character"
+    - pattern: "system-ui"
+      context: "primary font"
+      reason: "Generic fallback"
+
+  colors:
+    - pattern: "purple gradient on white"
+      reason: "Cliched AI aesthetic"
+    - pattern: "#6366f1"
+      context: "primary color"
+      reason: "Overused Tailwind purple"
+
+  layouts:
+    - pattern: "centered hero with gradient button"
+      reason: "Generic landing page pattern"
+
+# =============================================================================
+# PLAYWRIGHT TEST TEMPLATES
+# =============================================================================
+
+playwright_templates:
+  page_load_check: |
+    async function checkPageLoad(page, url) {
+      await page.goto(url, { timeout: 30000 });
+      await page.waitForLoadState('networkidle');
+      return { success: true, url };
+    }
+
+  console_error_check: |
+    async function checkConsoleErrors(page, url) {
+      const errors = [];
+      page.on('console', msg => {
+        if (msg.type() === 'error') errors.push(msg.text());
+      });
+      await page.goto(url);
+      await page.waitForLoadState('networkidle');
+      return { success: errors.length === 0, errors };
+    }
+
+  screenshot_capture: |
+    async function captureScreenshot(page, url, name) {
+      await page.goto(url);
+      await page.waitForLoadState('networkidle');
+      const path = `verification/${name}.png`;
+      await page.screenshot({ path, fullPage: false });
+      return { success: true, path };
+    }
+
+  hero_visibility_check: |
+    async function checkHeroVisibility(page, url) {
+      await page.goto(url);
+      await page.waitForLoadState('networkidle');
+      const hero = await page.locator('section').first();
+      const box = await hero.boundingBox();
+      return {
+        success: box && box.height > 400,
+        height: box?.height || 0
+      };
+    }
+
+  white_background_check: |
+    async function checkWhiteBackground(page, url) {
+      await page.goto(url);
+      await page.waitForLoadState('networkidle');
+      const bgColor = await page.evaluate(() => {
+        return window.getComputedStyle(document.body).backgroundColor;
+      });
+      const isWhite = bgColor === 'rgb(255, 255, 255)';
+      return { success: !isWhite, backgroundColor: bgColor };
+    }
+
+# =============================================================================
+# VALIDATION SCRIPTS
+# =============================================================================
+
+validation_scripts:
+  validate_tailwind:
+    language: "bash"
+    script: |
+      CONFIG="tailwind.config.js"
+      ERRORS=0
+      PATHS=$(grep -oP "'\./[^']+'" $CONFIG | tr -d "'")
+      for path in $PATHS; do
+        DIR=$(dirname "$path" | sed 's/\*\*.*//g')
+        if [ ! -d "$DIR" ] && [ "$DIR" != "." ]; then
+          echo "ERROR: Directory does not exist: $DIR"
+          ERRORS=$((ERRORS + 1))
+        fi
+      done
+      exit $ERRORS
+
+  validate_variants:
+    language: "typescript"
+    script: |
+      import * as fs from 'fs';
+      const VARIANTS = {
+        'variant-a': 'luxusMinimalist',
+        'variant-b': 'cinematicStorytelling',
+        'variant-c': 'dataRoiDriven',
+        'variant-d': 'editorialMagazine',
+      };
+      let errors = 0;
+      for (const [variant, expectedHero] of Object.entries(VARIANTS)) {
+        const filePath = `app/${variant}/page.tsx`;
+        const content = fs.readFileSync(filePath, 'utf-8');
+        if (!content.includes(`manifest.heroes.${expectedHero}`)) {
+          console.error(`ERROR: ${variant} does not reference ${expectedHero}`);
+          errors++;
+        }
+      }
+      process.exit(errors);
+
+# =============================================================================
+# OUTPUT REQUIREMENTS
+# =============================================================================
+
+outputs:
+  verification_report:
+    format: "json"
+    location: "verification/report.json"
+    contents:
+      - phase_scores
+      - overall_score
+      - tier_achieved
+      - screenshots_taken
+      - errors_found
+      - fixes_applied
+
+  screenshots:
+    location: "verification/"
+    naming: "{variant}-{viewport}.png"
+    required:
+      - "variant-a-desktop.png"
+      - "variant-b-desktop.png"
+      - "variant-c-desktop.png"
+      - "variant-d-desktop.png"
+      - "variant-a-mobile.png"
+      - "variant-b-mobile.png"
+      - "variant-c-mobile.png"
+      - "variant-d-mobile.png"
