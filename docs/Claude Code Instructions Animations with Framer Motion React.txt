@@ -1,0 +1,1261 @@
+Claude Code Instructions: Animations with Framer Motion & React
+OVERVIEW
+This guide provides complete instructions for building a sophisticated animated landing page inspired by Shopify Editions Winter '26. The design features parallax scrolling, floating artifacts, staggered animations, and scroll-triggered effects.
+
+PROJECT SETUP
+bash# Create Next.js project with TypeScript
+npx create-next-app@latest my-editions-page --typescript --tailwind --app
+
+# Install dependencies
+npm install framer-motion @studio-freight/lenis clsx tailwind-merge
+```
+
+---
+
+## FILE STRUCTURE
+```
+src/
+├── app/
+│   ├── layout.tsx
+│   ├── page.tsx
+│   └── globals.css
+├── components/
+│   ├── layout/
+│   │   ├── Header.tsx
+│   │   ├── SideNav.tsx
+│   │   └── SmoothScroll.tsx
+│   ├── sections/
+│   │   ├── HeroSection.tsx
+│   │   ├── FeatureSection.tsx
+│   │   └── ParallaxSection.tsx
+│   ├── ui/
+│   │   ├── FloatingArtifacts.tsx
+│   │   ├── CloudCard.tsx
+│   │   ├── DropCap.tsx
+│   │   ├── FeatureCard.tsx
+│   │   ├── SkillTag.tsx
+│   │   └── Badge.tsx
+│   └── animations/
+│       ├── variants.ts
+│       ├── ScrollReveal.tsx
+│       ├── StaggerContainer.tsx
+│       └── ParallaxLayer.tsx
+├── hooks/
+│   ├── useScrollProgress.ts
+│   ├── useInView.ts
+│   └── useSectionTheme.ts
+├── lib/
+│   └── utils.ts
+└── styles/
+    └── fonts.ts
+
+1. ANIMATION VARIANTS (Core Animation Library)
+typescript// src/components/animations/variants.ts
+
+import { Variants } from 'framer-motion';
+
+// ============================================
+// EASING FUNCTIONS (From Shopify Editions)
+// ============================================
+export const easings = {
+  // Standard ease - general transitions
+  standard: [0.4, 0, 0.2, 1],
+  // Stagger fade - element reveals
+  stagger: [0.41, 0.19, 0.13, 0.95],
+  // Navigation items entrance
+  navItem: [0.13, 0.46, 0.15, 0.92],
+  // Smooth opacity transitions
+  smooth: [0.25, 0.46, 0.45, 0.94],
+  // Slight overshoot for playful feel
+  outBack: [0.215, 0.61, 0.355, 1],
+  // SVG stroke animations
+  stroke: [0.72, 0.16, 0.19, 0.96],
+} as const;
+
+// ============================================
+// DURATION PRESETS
+// ============================================
+export const durations = {
+  fast: 0.15,
+  normal: 0.3,
+  medium: 0.52,
+  slow: 0.6,
+  verySlow: 1.0,
+  heroLines: 6.0,
+} as const;
+
+// ============================================
+// FADE IN VARIANTS
+// ============================================
+export const fadeIn: Variants = {
+  hidden: { 
+    opacity: 0 
+  },
+  visible: { 
+    opacity: 1,
+    transition: {
+      duration: durations.normal,
+      ease: easings.standard,
+    }
+  }
+};
+
+export const fadeInUp: Variants = {
+  hidden: { 
+    opacity: 0, 
+    y: 30 
+  },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: {
+      duration: durations.slow,
+      ease: easings.stagger,
+    }
+  }
+};
+
+export const fadeInDown: Variants = {
+  hidden: { 
+    opacity: 0, 
+    y: -30 
+  },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: {
+      duration: durations.slow,
+      ease: easings.stagger,
+    }
+  }
+};
+
+export const fadeInScale: Variants = {
+  hidden: { 
+    opacity: 0, 
+    scale: 0.95 
+  },
+  visible: { 
+    opacity: 1, 
+    scale: 1,
+    transition: {
+      duration: durations.slow,
+      ease: easings.smooth,
+    }
+  }
+};
+
+// ============================================
+// STAGGER CONTAINER VARIANTS
+// ============================================
+export const staggerContainer: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.075,
+      delayChildren: 0.1,
+    }
+  }
+};
+
+export const staggerContainerSlow: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.2,
+    }
+  }
+};
+
+// ============================================
+// NAVIGATION VARIANTS
+// ============================================
+export const navItemIn: Variants = {
+  hidden: { 
+    opacity: 0, 
+    y: '-100%' 
+  },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: {
+      duration: durations.verySlow,
+      ease: easings.navItem,
+    }
+  }
+};
+
+export const navStagger: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.04,
+      delayChildren: 0.5,
+    }
+  }
+};
+
+// ============================================
+// FLOATING ARTIFACT VARIANTS
+// ============================================
+export const floatingArtifact = (
+  scale: number = 0.5, 
+  delay: number = 0
+): Variants => ({
+  hidden: { 
+    opacity: 0, 
+    scale: scale * 0.8,
+    y: 20,
+  },
+  visible: { 
+    opacity: 1, 
+    scale: scale,
+    y: 0,
+    transition: {
+      duration: durations.slow,
+      delay,
+      ease: easings.smooth,
+    }
+  }
+});
+
+// ============================================
+// PARALLAX LAYER VARIANTS
+// ============================================
+export const parallaxLayer = (speed: number = 0.5) => ({
+  initial: { y: 0 },
+  animate: (scrollY: number) => ({
+    y: scrollY * speed,
+    transition: { 
+      type: 'tween', 
+      ease: 'linear',
+      duration: 0 
+    }
+  })
+});
+
+// ============================================
+// CARD HOVER VARIANTS
+// ============================================
+export const cardHover: Variants = {
+  rest: { 
+    scale: 1,
+    y: 0,
+  },
+  hover: { 
+    scale: 1.02,
+    y: -4,
+    transition: {
+      duration: durations.normal,
+      ease: easings.outBack,
+    }
+  }
+};
+
+export const cardTap: Variants = {
+  rest: { scale: 1 },
+  tap: { 
+    scale: 0.98,
+    transition: {
+      duration: durations.fast,
+    }
+  }
+};
+
+// ============================================
+// SKILL TAG CLOUD VARIANTS
+// ============================================
+export const skillTagFloat = (
+  x: number, 
+  y: number, 
+  delay: number = 0
+): Variants => ({
+  hidden: { 
+    opacity: 0, 
+    x: x * 0.5, 
+    y: y * 0.5,
+    scale: 0.8,
+  },
+  visible: { 
+    opacity: 1, 
+    x, 
+    y,
+    scale: 1,
+    transition: {
+      duration: durations.slow,
+      delay,
+      ease: easings.smooth,
+    }
+  }
+});
+
+// ============================================
+// SECTION TITLE VARIANTS
+// ============================================
+export const sectionTitle: Variants = {
+  hidden: { 
+    opacity: 0, 
+    y: 50,
+  },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: {
+      duration: 0.8,
+      ease: easings.navItem,
+    }
+  }
+};
+
+export const dropCapReveal: Variants = {
+  hidden: { 
+    opacity: 0, 
+    scale: 0.8,
+    rotate: -10,
+  },
+  visible: { 
+    opacity: 1, 
+    scale: 1,
+    rotate: 0,
+    transition: {
+      duration: durations.slow,
+      ease: easings.outBack,
+    }
+  }
+};
+
+// ============================================
+// MEDIA REVEAL VARIANTS
+// ============================================
+export const mediaEntrance: Variants = {
+  hidden: { 
+    opacity: 0, 
+    scale: 0.95,
+    clipPath: 'inset(10% 10% 10% 10%)',
+  },
+  visible: { 
+    opacity: 1, 
+    scale: 1,
+    clipPath: 'inset(0% 0% 0% 0%)',
+    transition: {
+      duration: durations.slow,
+      ease: easings.smooth,
+    }
+  }
+};
+
+export const imageReveal: Variants = {
+  hidden: { 
+    clipPath: 'inset(0 100% 0 0)',
+  },
+  visible: { 
+    clipPath: 'inset(0 0% 0 0)',
+    transition: {
+      duration: 0.8,
+      ease: easings.standard,
+    }
+  }
+};
+
+// ============================================
+// PULSE ANIMATION (For backgrounds)
+// ============================================
+export const opacityPulse: Variants = {
+  initial: { opacity: 0.5 },
+  animate: {
+    opacity: [0.5, 0.8, 0.5],
+    transition: {
+      duration: 2,
+      ease: 'easeInOut',
+      repeat: Infinity,
+    }
+  }
+};
+
+// ============================================
+// LINE DRAW ANIMATION (Da Vinci lines)
+// ============================================
+export const lineDrawVariants: Variants = {
+  hidden: { 
+    pathLength: 0,
+    opacity: 0,
+  },
+  visible: { 
+    pathLength: 1,
+    opacity: 1,
+    transition: {
+      pathLength: {
+        duration: durations.heroLines,
+        ease: easings.stroke,
+      },
+      opacity: {
+        duration: 0.5,
+      }
+    }
+  }
+};
+
+2. REUSABLE ANIMATION COMPONENTS
+ScrollReveal Component
+tsx// src/components/animations/ScrollReveal.tsx
+
+'use client';
+
+import { motion, Variants, useInView } from 'framer-motion';
+import { useRef, ReactNode } from 'react';
+import { fadeInUp } from './variants';
+
+interface ScrollRevealProps {
+  children: ReactNode;
+  variants?: Variants;
+  className?: string;
+  delay?: number;
+  once?: boolean;
+  margin?: string;
+  as?: keyof JSX.IntrinsicElements;
+}
+
+export function ScrollReveal({
+  children,
+  variants = fadeInUp,
+  className = '',
+  delay = 0,
+  once = true,
+  margin = '-10%',
+  as = 'div',
+}: ScrollRevealProps) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { 
+    once, 
+    margin,
+  });
+
+  const MotionComponent = motion[as as keyof typeof motion] as typeof motion.div;
+
+  return (
+    <MotionComponent
+      ref={ref}
+      initial="hidden"
+      animate={isInView ? 'visible' : 'hidden'}
+      variants={variants}
+      className={className}
+      custom={delay}
+      style={{ 
+        transitionDelay: delay ? `${delay}s` : undefined 
+      }}
+    >
+      {children}
+    </MotionComponent>
+  );
+}
+StaggerContainer Component
+tsx// src/components/animations/StaggerContainer.tsx
+
+'use client';
+
+import { motion, Variants, useInView } from 'framer-motion';
+import { useRef, ReactNode } from 'react';
+import { staggerContainer, fadeInUp } from './variants';
+
+interface StaggerContainerProps {
+  children: ReactNode;
+  className?: string;
+  staggerDelay?: number;
+  childVariants?: Variants;
+  once?: boolean;
+  as?: keyof JSX.IntrinsicElements;
+}
+
+export function StaggerContainer({
+  children,
+  className = '',
+  staggerDelay = 0.075,
+  childVariants = fadeInUp,
+  once = true,
+  as = 'div',
+}: StaggerContainerProps) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once, margin: '-10%' });
+
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: staggerDelay,
+        delayChildren: 0.1,
+      }
+    }
+  };
+
+  const MotionComponent = motion[as as keyof typeof motion] as typeof motion.div;
+
+  return (
+    <MotionComponent
+      ref={ref}
+      initial="hidden"
+      animate={isInView ? 'visible' : 'hidden'}
+      variants={containerVariants}
+      className={className}
+    >
+      {Array.isArray(children) 
+        ? children.map((child, index) => (
+            <motion.div key={index} variants={childVariants}>
+              {child}
+            </motion.div>
+          ))
+        : children
+      }
+    </MotionComponent>
+  );
+}
+ParallaxLayer Component
+tsx// src/components/animations/ParallaxLayer.tsx
+
+'use client';
+
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { useRef, ReactNode } from 'react';
+
+interface ParallaxLayerProps {
+  children: ReactNode;
+  speed?: number;
+  direction?: 'up' | 'down';
+  className?: string;
+  offset?: [string, string];
+}
+
+export function ParallaxLayer({
+  children,
+  speed = 0.5,
+  direction = 'up',
+  className = '',
+  offset = ['start end', 'end start'],
+}: ParallaxLayerProps) {
+  const ref = useRef(null);
+  
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: offset as any,
+  });
+
+  const factor = direction === 'up' ? -1 : 1;
+  const y = useTransform(
+    scrollYProgress,
+    [0, 1],
+    [0, factor * speed * 200]
+  );
+
+  return (
+    <motion.div
+      ref={ref}
+      style={{ y }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+3. FLOATING ARTIFACTS COMPONENT
+tsx// src/components/ui/FloatingArtifacts.tsx
+
+'use client';
+
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { useRef } from 'react';
+import { floatingArtifact, easings } from '../animations/variants';
+import Image from 'next/image';
+
+interface Artifact {
+  id: string;
+  src: string;
+  alt: string;
+  position: {
+    left: string;
+    top: string;
+  };
+  scale: number;
+  rotate?: number;
+  badge?: {
+    number: number;
+    icon?: string;
+  };
+  zIndex?: number;
+}
+
+interface FloatingArtifactsProps {
+  artifacts: Artifact[];
+  children: React.ReactNode;
+  className?: string;
+}
+
+export function FloatingArtifacts({
+  artifacts,
+  children,
+  className = '',
+}: FloatingArtifactsProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start end', 'end start'],
+  });
+
+  return (
+    <div
+      ref={containerRef}
+      className={`relative ${className}`}
+      style={{ containerType: 'inline-size' }}
+    >
+      {/* Main content */}
+      <div className="relative z-10">
+        {children}
+      </div>
+
+      {/* Floating artifacts */}
+      {artifacts.map((artifact, index) => (
+        <FloatingArtifact
+          key={artifact.id}
+          artifact={artifact}
+          index={index}
+          scrollYProgress={scrollYProgress}
+        />
+      ))}
+    </div>
+  );
+}
+
+function FloatingArtifact({
+  artifact,
+  index,
+  scrollYProgress,
+}: {
+  artifact: Artifact;
+  index: number;
+  scrollYProgress: any;
+}) {
+  // Different parallax speeds based on scale (smaller = slower = further away)
+  const parallaxFactor = (1 - artifact.scale) * 50 + 20;
+  
+  const y = useTransform(
+    scrollYProgress,
+    [0, 1],
+    [0, parallaxFactor]
+  );
+
+  const rotate = useTransform(
+    scrollYProgress,
+    [0, 1],
+    [artifact.rotate || 0, (artifact.rotate || 0) + (index % 2 === 0 ? 3 : -3)]
+  );
+
+  return (
+    <motion.div
+      className="absolute pointer-events-none"
+      style={{
+        left: artifact.position.left,
+        top: artifact.position.top,
+        zIndex: artifact.zIndex || 1,
+        y,
+        rotate,
+      }}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: '-5%' }}
+      variants={floatingArtifact(artifact.scale, index * 0.1)}
+    >
+      {/* Badge */}
+      {artifact.badge && (
+        <div className="absolute -top-2 -left-2 z-10 flex items-center gap-1">
+          <span className="flex items-center justify-center w-6 h-6 bg-black/70 text-white text-xs font-medium rounded">
+            {artifact.badge.number}
+          </span>
+          <span className="w-4 h-4 bg-black/50 rounded-sm flex items-center justify-center">
+            {artifact.badge.icon && (
+              <Image 
+                src={artifact.badge.icon} 
+                alt="" 
+                width={12} 
+                height={12} 
+              />
+            )}
+          </span>
+        </div>
+      )}
+      
+      {/* Image */}
+      <motion.div
+        style={{ scale: artifact.scale }}
+        className="origin-top-left"
+      >
+        <Image
+          src={artifact.src}
+          alt={artifact.alt}
+          width={340}
+          height={200}
+          className="w-auto h-auto max-w-none"
+        />
+      </motion.div>
+    </motion.div>
+  );
+}
+
+4. CLOUD CARD COMPONENT (Chat Bubbles)
+tsx// src/components/ui/CloudCard.tsx
+
+'use client';
+
+import { motion } from 'framer-motion';
+import { floatingArtifact, cardHover, easings } from '../animations/variants';
+
+interface CloudCardProps {
+  content: string;
+  position: {
+    left: string;
+    top: string;
+  };
+  scale?: number;
+  variant?: 'parallax' | 'interactive';
+  delay?: number;
+  className?: string;
+  onClick?: () => void;
+}
+
+export function CloudCard({
+  content,
+  position,
+  scale = 1,
+  variant = 'parallax',
+  delay = 0,
+  className = '',
+  onClick,
+}: CloudCardProps) {
+  const isInteractive = variant === 'interactive';
+
+  return (
+    <motion.div
+      className={`
+        absolute w-[340px] origin-left
+        ${isInteractive ? 'cursor-pointer pointer-events-auto' : 'pointer-events-none'}
+        ${className}
+      `}
+      style={{
+        left: position.left,
+        top: position.top,
+      }}
+      initial="hidden"
+      whileInView="visible"
+      whileHover={isInteractive ? 'hover' : undefined}
+      viewport={{ once: true, margin: '-5%' }}
+      variants={floatingArtifact(scale, delay)}
+      onClick={onClick}
+    >
+      <motion.div
+        className="bg-white rounded-xl shadow-card p-4"
+        variants={isInteractive ? cardHover : undefined}
+        style={{ scale }}
+      >
+        {/* Avatar and content */}
+        <div className="flex items-start gap-3">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm text-gray-800">{content}</p>
+          </div>
+        </div>
+        
+        {/* Send button */}
+        <div className="flex justify-end mt-3">
+          <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center">
+            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+            </svg>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+5. HERO SECTION WITH PARALLAX
+tsx// src/components/sections/HeroSection.tsx
+
+'use client';
+
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { useRef } from 'react';
+import { ParallaxLayer } from '../animations/ParallaxLayer';
+import { ScrollReveal } from '../animations/ScrollReveal';
+import { DropCap } from '../ui/DropCap';
+import { sectionTitle, fadeInUp, easings } from '../animations/variants';
+import Image from 'next/image';
+
+interface HeroSectionProps {
+  title: string;
+  subtitle: string;
+  dropCapLetter: string;
+  backgroundImage: string;
+  midgroundImage?: string;
+  foregroundImage?: string;
+  theme?: 'light' | 'dark';
+}
+
+export function HeroSection({
+  title,
+  subtitle,
+  dropCapLetter,
+  backgroundImage,
+  midgroundImage,
+  foregroundImage,
+  theme = 'light',
+}: HeroSectionProps) {
+  const sectionRef = useRef<HTMLElement>(null);
+  
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start start', 'end start'],
+  });
+
+  // Parallax transforms
+  const bgY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
+  const midY = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
+  const frontY = useTransform(scrollYProgress, [0, 1], ['0%', '70%']);
+  const contentY = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+
+  return (
+    <section
+      ref={sectionRef}
+      data-theme={theme}
+      className={`
+        relative min-h-screen overflow-hidden
+        ${theme === 'dark' ? 'bg-olive text-cream' : 'bg-cream text-olive'}
+      `}
+    >
+      {/* Parallax Background Layers */}
+      <div className="absolute inset-0">
+        {/* Background - slowest */}
+        <motion.div 
+          className="absolute inset-0 w-full h-[120%]"
+          style={{ y: bgY }}
+        >
+          <Image
+            src={backgroundImage}
+            alt=""
+            fill
+            className="object-cover"
+            priority
+          />
+        </motion.div>
+
+        {/* Midground */}
+        {midgroundImage && (
+          <motion.div 
+            className="absolute inset-0 w-full h-[120%]"
+            style={{ y: midY }}
+          >
+            <Image
+              src={midgroundImage}
+              alt=""
+              fill
+              className="object-cover"
+            />
+          </motion.div>
+        )}
+
+        {/* Foreground - fastest */}
+        {foregroundImage && (
+          <motion.div 
+            className="absolute inset-0 w-full h-[120%]"
+            style={{ y: frontY }}
+          >
+            <Image
+              src={foregroundImage}
+              alt=""
+              fill
+              className="object-cover"
+            />
+          </motion.div>
+        )}
+      </div>
+
+      {/* Content */}
+      <motion.div
+        className="relative z-10 min-h-screen flex items-end p-8 lg:p-16"
+        style={{ y: contentY, opacity: contentOpacity }}
+      >
+        <div className="max-w-4xl">
+          {/* Section Title */}
+          <ScrollReveal variants={sectionTitle}>
+            <h2 className="font-display text-[clamp(60px,12vw,160px)] font-bold leading-[0.9] mb-8">
+              {title}
+            </h2>
+          </ScrollReveal>
+
+          {/* Subtitle with Drop Cap */}
+          <ScrollReveal variants={fadeInUp} delay={0.2}>
+            <p className="font-serif text-[clamp(18px,3vw,38px)] leading-relaxed">
+              <DropCap letter={dropCapLetter} />
+              {subtitle}
+            </p>
+          </ScrollReveal>
+        </div>
+      </motion.div>
+
+      {/* Scroll Indicator */}
+      <motion.div
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-60"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 0.6, y: 0 }}
+        transition={{ delay: 1.5, duration: 0.6 }}
+      >
+        <span className="text-sm">Scroll to explore</span>
+        <motion.div
+          className="w-5 h-8 border-2 border-current rounded-full relative"
+          animate={{ y: [0, 5, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        >
+          <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-1 h-2 bg-current rounded-full" />
+        </motion.div>
+      </motion.div>
+    </section>
+  );
+}
+
+6. FEATURE SECTION WITH FLOATING ARTIFACTS
+tsx// src/components/sections/FeatureSection.tsx
+
+'use client';
+
+import { motion } from 'framer-motion';
+import { FloatingArtifacts } from '../ui/FloatingArtifacts';
+import { ScrollReveal } from '../animations/ScrollReveal';
+import { StaggerContainer } from '../animations/StaggerContainer';
+import { FeatureCard } from '../ui/FeatureCard';
+import { fadeInUp, staggerContainer } from '../animations/variants';
+
+interface Feature {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  link?: string;
+}
+
+interface Artifact {
+  id: string;
+  src: string;
+  alt: string;
+  position: { left: string; top: string };
+  scale: number;
+  rotate?: number;
+  badge?: { number: number };
+}
+
+interface FeatureSectionProps {
+  label: string;
+  title: string;
+  subtitle: string;
+  dropCapLetter: string;
+  features: Feature[];
+  artifacts: Artifact[];
+  mainContent: React.ReactNode;
+}
+
+export function FeatureSection({
+  label,
+  title,
+  subtitle,
+  dropCapLetter,
+  features,
+  artifacts,
+  mainContent,
+}: FeatureSectionProps) {
+  return (
+    <section className="relative py-24 lg:py-32 bg-cream">
+      <div className="container mx-auto px-6 lg:px-8">
+        {/* Header */}
+        <div className="max-w-2xl mb-16">
+          <ScrollReveal>
+            <span className="text-sm font-medium text-olive/60 uppercase tracking-wider">
+              {label}
+            </span>
+          </ScrollReveal>
+          
+          <ScrollReveal delay={0.1}>
+            <h2 className="font-serif text-[clamp(24px,4vw,42px)] mt-4 leading-snug">
+              <span className="float-left text-[2.5em] leading-[0.8] mr-2 mt-1 font-display">
+                {dropCapLetter}
+              </span>
+              {title}
+            </h2>
+          </ScrollReveal>
+          
+          <ScrollReveal delay={0.2}>
+            <p className="mt-4 text-olive/70">{subtitle}</p>
+          </ScrollReveal>
+        </div>
+
+        {/* Main Content with Floating Artifacts */}
+        <FloatingArtifacts artifacts={artifacts} className="mb-16">
+          {mainContent}
+        </FloatingArtifacts>
+
+        {/* Feature Cards Grid */}
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {features.map((feature) => (
+            <FeatureCard
+              key={feature.id}
+              title={feature.title}
+              description={feature.description}
+              image={feature.image}
+              link={feature.link}
+            />
+          ))}
+        </StaggerContainer>
+      </div>
+    </section>
+  );
+}
+
+7. SKILL TAG CLOUD (Floating Tags)
+tsx// src/components/ui/SkillTagCloud.tsx
+
+'use client';
+
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { useRef } from 'react';
+import { skillTagFloat, easings } from '../animations/variants';
+
+interface SkillTag {
+  id: string;
+  label: string;
+  description?: string;
+  count?: number;
+  position: { x: number; y: number };
+  scale?: number;
+}
+
+interface SkillTagCloudProps {
+  tags: SkillTag[];
+  className?: string;
+}
+
+export function SkillTagCloud({ tags, className = '' }: SkillTagCloudProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start end', 'end start'],
+  });
+
+  return (
+    <div
+      ref={containerRef}
+      className={`relative h-[60vh] overflow-hidden ${className}`}
+    >
+      {tags.map((tag, index) => (
+        <SkillTagItem
+          key={tag.id}
+          tag={tag}
+          index={index}
+          scrollYProgress={scrollYProgress}
+        />
+      ))}
+    </div>
+  );
+}
+
+function SkillTagItem({
+  tag,
+  index,
+  scrollYProgress,
+}: {
+  tag: SkillTag;
+  index: number;
+  scrollYProgress: any;
+}) {
+  // Floating animation offset
+  const floatY = useTransform(
+    scrollYProgress,
+    [0, 1],
+    [0, (index % 2 === 0 ? 1 : -1) * 20]
+  );
+
+  return (
+    <motion.div
+      className="absolute"
+      style={{
+        left: `${tag.position.x}%`,
+        top: `${tag.position.y}%`,
+        y: floatY,
+      }}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
+      variants={skillTagFloat(0, 0, index * 0.05)}
+    >
+      <motion.button
+        className={`
+          group relative px-4 py-2 rounded-full
+          bg-cream-light text-olive
+          font-mono text-sm
+          transition-all duration-300
+          hover:scale-105 hover:shadow-lg
+          ${tag.scale ? `scale-[${tag.scale}]` : ''}
+        `}
+        style={{ 
+          scale: tag.scale || 1,
+          transformOrigin: 'center',
+        }}
+        whileHover={{ scale: (tag.scale || 1) * 1.05 }}
+        whileTap={{ scale: (tag.scale || 1) * 0.98 }}
+      >
+        <span className="flex items-center gap-2">
+          <span>{tag.label}</span>
+          {tag.count && (
+            <span className="px-2 py-0.5 bg-olive/10 rounded-full text-xs">
+              {tag.count}
+            </span>
+          )}
+        </span>
+
+        {/* Expanded description on hover */}
+        {tag.description && (
+          <motion.div
+            className="absolute left-0 top-full mt-2 w-64 p-3 bg-olive text-cream rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10"
+            initial={{ opacity: 0, y: -10 }}
+            whileHover={{ opacity: 1, y: 0 }}
+          >
+            <p className="text-xs">{tag.description}</p>
+          </motion.div>
+        )}
+      </motion.button>
+    </motion.div>
+  );
+}
+
+8. DA VINCI LINES OVERLAY
+tsx// src/components/ui/DaVinciLines.tsx
+
+'use client';
+
+import { motion } from 'framer-motion';
+import { lineDrawVariants, easings, durations } from '../animations/variants';
+
+interface DaVinciLinesProps {
+  className?: string;
+}
+
+export function DaVinciLines({ className = '' }: DaVinciLinesProps) {
+  // Generate random line paths
+  const lines = generateLines(20);
+
+  return (
+    <div className={`fixed inset-0 pointer-events-none z-50 ${className}`}>
+      <svg
+        className="w-full h-full"
+        viewBox="0 0 1920 1080"
+        preserveAspectRatio="xMidYMid slice"
+      >
+        {lines.map((line, index) => (
+          <motion.path
+            key={index}
+            d={line.path}
+            fill="none"
+            stroke="rgba(41, 41, 25, 0.08)"
+            strokeWidth={line.strokeWidth}
+            initial="hidden"
+            animate="visible"
+            variants={lineDrawVariants}
+            style={{
+              strokeDasharray: 1000,
+              strokeDashoffset: 1000,
+            }}
+            transition={{
+              delay: index * 0.1,
+              duration: durations.heroLines,
+              ease: easings.stroke,
+            }}
+          />
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+function generateLines(count: number) {
+  const lines = [];
+  
+  for (let i = 0; i < count; i++) {
+    const startX = Math.random() * 1920;
+    const startY = Math.random() * 1080;
+    const endX = Math.random() * 1920;
+    const endY = Math.random() * 1080;
+    const controlX1 = (startX + endX) / 2 + (Math.random() - 0.5) * 400;
+    const controlY1 = (startY + endY) / 2 + (Math.random() - 0.5) * 400;
+    
+    lines.push({
+      path: `M ${startX} ${startY} Q ${controlX1} ${controlY1} ${endX} ${endY}`,
+      strokeWidth: 0.5 + Math.random() * 1,
+    });
+  }
+  
+  return lines;
+}
+
+9. SMOOTH SCROLL PROVIDER
+tsx// src/components/layout/SmoothScroll.tsx
+
+'use client';
+
+import { useEffect, useRef, ReactNode } from 'react';
+import Lenis from '@studio-freight/lenis';
+
+interface SmoothScrollProps {
+  children: ReactNode;
+}
+
+export function SmoothScroll({ children }: SmoothScrollProps) {
+  const lenisRef = useRef<Lenis | null>(null);
+
+  useEffect(() => {
+    // Initialize Lenis
+    lenisRef.current = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      direction: 'vertical',
+      gestureDirection: 'vertical',
+      smooth: true,
+      smoothTouch: false,
+      touchMultiplier: 2,
+    });
+
+    // RAF loop
+    function raf(time: number) {
+      lenisRef.current?.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    // Cleanup
+    return () => {
+      lenisRef.current?.destroy();
+    };
+  }, []);
+
+  return <>{children}</>;
+}
+
+10. COMPLETE PAGE EXAMPLE
+tsx// src/app/page.tsx
+
+import { SmoothScroll } from '@/components/layout/SmoothScroll';
+import { Header } from '@/components/layout/Header';
+import { SideNav } from '@/components/layout/SideNav';
+import { HeroSection } from '@/components/sections/HeroSection';
+import {

@@ -1,0 +1,60 @@
+{
+  "generated_at": "2026-01-02T16:18:53.919Z",
+  "heroes": {
+    "luxusMinimalist": {
+      "image": "/assets/heroes/luxus-minimalist.jpg",
+      "video": "/assets/heroes/luxus-minimalist.mp4"
+    },
+    "cinematicStorytelling": {
+      "image": "/assets/heroes/cinematic-storytelling.jpg",
+      "video": "/assets/heroes/cinematic-storytelling.mp4"
+    },
+    "dataRoiDriven": {
+      "image": "/assets/heroes/data-roi-driven.jpg",
+      "video": "/assets/heroes/data-roi-driven.mp4"
+    },
+    "editorialMagazine": {
+      "image": "/assets/heroes/editorial-magazine.jpg",
+      "video": "/assets/heroes/editorial-magazine.mp4"
+    }
+  },
+  "portfolio": [
+    {
+      "id": "penthouse-doebling",
+      "title": "Penthouse Döbling",
+      "location": "1190 Wien",
+      "image": "/assets/portfolio/penthouse-doebling.png"
+    },
+    {
+      "id": "altbau-innere-stadt",
+      "title": "Altbau Innere Stadt",
+      "location": "1010 Wien",
+      "image": "/assets/portfolio/altbau-innere-stadt.png"
+    },
+    {
+      "id": "modern-loft-mariahilf",
+      "title": "Modern Loft Mariahilf",
+      "location": "1060 Wien",
+      "image": "/assets/portfolio/modern-loft-mariahilf.jpg"
+    },
+    {
+      "id": "villa-hietzing",
+      "title": "Villa Hietzing",
+      "location": "1130 Wien",
+      "image": "/assets/portfolio/villa-hietzing.jpg"
+    },
+    {
+      "id": "neubau-balkon",
+      "title": "Neubau Balkon",
+      "location": "1070 Wien",
+      "image": "/assets/portfolio/neubau-balkon.png"
+    },
+    {
+      "id": "dachgeschoss-leopoldstadt",
+      "title": "Dachgeschoss Leopoldstadt",
+      "location": "1020 Wien",
+      "image": "/assets/portfolio/dachgeschoss-leopoldstadt.jpg"
+    }
+  ],
+  "downloaded_at": "2026-01-02T18:40:28.198Z"
+}

@@ -1,0 +1,44 @@
+{
+  "steps": [
+    {
+      "id": "step-1",
+      "number": 1,
+      "title": "Kostenlose Beratung",
+      "description": "Wir besprechen Ihre Anforderungen, analysieren Ihre Immobilie und empfehlen das optimale Paket für Ihre Bedürfnisse.",
+      "duration": "15-30 Min.",
+      "icon": "chat"
+    },
+    {
+      "id": "step-2",
+      "number": 2,
+      "title": "Terminvereinbarung",
+      "description": "Flexibel Terminbuchung online oder telefonisch. Wir passen uns Ihrem Zeitplan an - auch Abend- und Wochenendtermine möglich.",
+      "duration": "1-2 Tage",
+      "icon": "calendar"
+    },
+    {
+      "id": "step-3",
+      "number": 3,
+      "title": "Professionelles Shooting",
+      "description": "Unser Team erstellt hochwertige Aufnahmen mit professioneller Ausrüstung. Wir arbeiten schnell und diskret vor Ort.",
+      "duration": "1-3 Stunden",
+      "icon": "camera"
+    },
+    {
+      "id": "step-4",
+      "number": 4,
+      "title": "Bearbeitung & Optimierung",
+      "description": "Professionelle Nachbearbeitung, Farbkorrektur, HDR-Processing und Erstellung der virtuellen Rundgänge in unserem Studio.",
+      "duration": "12-48 Stunden",
+      "icon": "desktop"
+    },
+    {
+      "id": "step-5",
+      "number": 5,
+      "title": "Lieferung & Support",
+      "description": "Sie erhalten alle Dateien in Web- und Druckqualität plus Online-Galerie. Kostenloser Support bei Fragen oder Anpassungen.",
+      "duration": "Sofort",
+      "icon": "check"
+    }
+  ]
+}

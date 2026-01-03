@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cream: #DCDCD0;
+  --olive: #292919;
+  --gold: #C9A55C;
+  --trust-blue: #2E5EAA;
+  --success-green: #00C49A;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-inter);
+  }
+}
+
+@layer utilities {
+  .text-cream {
+    color: var(--cream);
+  }
+  .text-olive {
+    color: var(--olive);
+  }
+  .text-gold {
+    color: var(--gold);
+  }
+  .bg-cream {
+    background-color: var(--cream);
+  }
+  .bg-olive {
+    background-color: var(--olive);
+  }
+  .font-display {
+    font-family: var(--font-space-grotesk);
+  }
+  .font-serif {
+    font-family: var(--font-cormorant-garamond);
+  }
+}
